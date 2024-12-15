@@ -89,12 +89,12 @@ public class UserImpl implements User {
     }
 
     @Override
-    public User AddFriend(User user) throws SamePerson, AlreadyFriends {
-        if (this == user)
-            throw new SamePerson();
-
+    public User AddFriend(User user) throws AlreadyFriends, SamePerson {
         if (friends.contains(user))
             throw new AlreadyFriends();
+
+        if (this == user)
+            throw new SamePerson();
 
         friends.add(user);
 
