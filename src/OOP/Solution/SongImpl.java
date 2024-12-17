@@ -74,7 +74,7 @@ public class SongImpl implements Song {
     @Override
     public double getAverageRating() {
         if (raters.isEmpty())
-            return 0;
+            return 0.0;
 
         double sum = 0;
 

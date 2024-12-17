@@ -81,12 +81,6 @@ public class TechnionTunesImpl implements TechnionTunes {
                 intersection.retainAll(ratedSongs);
             }
         }
-// TODO: check if this is the correct implementation
-//        for (int id : IDs) {
-//            User user = this.getUser(id);
-//            Set<Song> ratedSongs = new HashSet<>(user.getRatedSongs());
-//            intersection.addAll(ratedSongs);
-//        }
 
         return intersection == null ? new HashSet<>() : intersection;
     }
@@ -101,7 +95,7 @@ public class TechnionTunesImpl implements TechnionTunes {
     @Override
     public Collection<Song> getHighestRatedSongs(int num) {
         return songs.values().stream()
-                .sorted(Comparator.comparingDouble(Song::getAverageRating).reversed()
+                .sorted(Comparator.comparingDouble(Song::getAverageRating)
                         .thenComparingInt(Song::getLength).reversed()
                         .thenComparingInt(Song::getID))
                 .limit(num)
@@ -111,8 +105,8 @@ public class TechnionTunesImpl implements TechnionTunes {
     @Override
     public Collection<Song> getMostRatedSongs(int num) {
         return songs.values().stream()
-                .sorted(Comparator.comparingInt((Song s) -> s.getRatings().size()).reversed()
-                        .thenComparingInt(Song::getLength)
+                .sorted(Comparator.comparingInt((Song s) -> s.getRaters().size()).reversed()
+                        .thenComparingInt(Song::getLength).reversed()
                         .thenComparingInt(Song::getID).reversed())
                 .limit(num)
                 .collect(Collectors.toList());
@@ -121,7 +115,7 @@ public class TechnionTunesImpl implements TechnionTunes {
     @Override
     public Collection<User> getTopLikers(int num) {
         return users.values().stream()
-                .sorted(Comparator.comparingDouble(User::getAverageRating).reversed()
+                .sorted(Comparator.comparingDouble(User::getAverageRating)
                         .thenComparingInt(User::getAge).reversed()
                         .thenComparingInt(User::getID))
                 .limit(num)
@@ -133,9 +127,15 @@ public class TechnionTunesImpl implements TechnionTunes {
         User user1 = this.getUser(userId1);
         User user2 = this.getUser(userId2);
 
+        // Same user
         if (user1 == user2)
             return true;
 
+        // Friends that don't share a favorite song
+        if(user1.getFriends().containsKey(user2) && !user1.favoriteSongInCommon(user2))
+            return false;
+
+        // BFS to find two users that either are friends who share a favorite song or aren't but have a "canGetAlong" path
         Set<User> visited = new HashSet<>();
         Queue<User> queue = new LinkedList<>();
         queue.add(user1);
